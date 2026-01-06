@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal("tax_cost");
             $table->decimal("manufacturing_cost");
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
