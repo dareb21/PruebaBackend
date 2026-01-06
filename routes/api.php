@@ -2,8 +2,15 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
 
-Route::get('/api', function () {
-
-return response()->json("Hola api");
+Route::controller(ProductController::class)->group(function() {
+Route::prefix("products")->group(function() {
+   Route::post("/","createNewProduct"); 
+   Route::get("/{id}","viewProductById");
+   Route::put("/{id}","updateProduct");
+   Route::delete("/{id}","deleteProduct");
+   Route::get("/{id}/prices","priceListOfProduct");
+   Route::post("/{id}/prices","createNewPriceOfProduct");
+});
 });
