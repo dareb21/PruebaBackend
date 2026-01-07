@@ -21,7 +21,16 @@ class ProductServices
     public function createNewProduct(array $newProductBody){
 
     return DB::transaction(function () use ($newProductBody) {
-        $newProduct= Product::create($newProductBody);
+    try {
+            $newProduct= Product::create($newProductBody);
+        } 
+    catch (\Throwable $th) {
+          throw new HttpResponseException(  response()->json([
+                'error' => 'Producto duplicado',
+                'message' => 'No se puede crear este producto ya que existe uno con un nombre similar.',
+            ], 400));   
+         }
+        
 
         ProductPrice::create([
             "product_id"=>$newProduct->id,
@@ -66,8 +75,9 @@ class ProductServices
 
     foreach ($priceListOfProduct->prices as $price) {
         $listOfPrices['prices'][] = [
-            'amount' => $price->price,
-            'currency' => $price->currency->symbol
+            'price' => $price->price,
+            'currency' => $price->currency->symbol,
+            'currency_id' => $price->currency->id
         ];
     }
         return $listOfPrices;
@@ -77,11 +87,20 @@ class ProductServices
     public function createNewPriceOfProduct($productId,$validatedPriceProduct)
     {
         $foundProduct = $this->validateProductExists($productId);
-        $newPriceProduct = ProductPrice::create([
+        try {
+            $newPriceProduct = ProductPrice::create([
             "product_id"=>$productId,
             "currency_id"=>$validatedPriceProduct["currency_id"],
             "price"=>$validatedPriceProduct["price"],             
         ]);
+        } catch (\Throwable $th) {    
+            throw new HttpResponseException(  response()->json([
+                'error' => 'Precio duplicado',
+                'message' => 'No se puede crear un precio porque ya existe un registro para este producto y moneda',
+            ], 400));
+        }
+        
+        
         
   return $validatedPriceProduct["price"];
     }
