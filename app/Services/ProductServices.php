@@ -50,14 +50,14 @@ class ProductServices
     public function deleteProduct($productId){  
         $foundProduct = $this->validateProductExists($productId);
         $foundProduct->delete();
-}
+    }
 
     public function priceListOfProduct($productId)
     {
-        $priceListOfProduct = Product::with("prices.currency")->findOrFail($productId);
+        $priceListOfProduct = Product::with("prices.currency")->find($productId);
         if (!$priceListOfProduct)
             {
-                throw new HttpResponseException(response()->json(['message' => 'Producto NO encontrado'], 404));
+                    throw new HttpResponseException(response()->json(['message' => 'Producto NO encontrado'], 404));
             }
         $listOfPrices = [
         'name' => $priceListOfProduct->name,
