@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('currencies', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
-            $table->string("symbol");
+            $table->string("name")->unique();
+            $table->string("symbol")->unique();
             $table->decimal("exchange_rate");
             $table->timestamps();
+            
+            $table->unique(['product_id', 'currency_id']);
         });
     }
 
