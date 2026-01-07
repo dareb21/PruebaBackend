@@ -18,7 +18,6 @@ return new class extends Migration
             $table->decimal("exchange_rate");
             $table->timestamps();
             
-            $table->unique(['product_id', 'currency_id']);
         });
     }
 
