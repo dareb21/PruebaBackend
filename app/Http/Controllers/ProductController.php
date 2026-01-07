@@ -13,6 +13,7 @@ class ProductController extends Controller
     public function __construct(private ProductServices $productServices ) {}
     
     public function createNewProduct(CreateNewProductRequest $request){  
+        
         $validatedNewProduct = $request->validated();
         $newProduct = $this->productServices->createNewProduct($validatedNewProduct); 
     
@@ -47,7 +48,9 @@ class ProductController extends Controller
 //Desarollo
     public function priceListOfProduct($productId)
     {
-       return $priceListOfProduct = $this->productServices->priceListOfProduct($productId);
+        $priceListOfProduct = $this->productServices->priceListOfProduct($productId);
+        return response()->json([$priceListOfProduct]);
+       
     }
 
     public function createNewPriceOfProduct(CreateNewPriceProductRequest $request,$productId)

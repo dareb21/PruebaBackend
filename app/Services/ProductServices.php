@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Services;
 use App\Models\Product;
 use App\Models\ProductPrice;
 use Illuminate\Support\Facades\DB; 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProductServices
 {
@@ -17,73 +17,65 @@ class ProductServices
             "currency_id"=>$newProductBody["currency_id"],
             "price"=>$newProductBody["price"], 
         ]);
-        return $newProductBody;  
+        return $newProduct;  
         });      
     }
 
     public function viewAllProduct(){
-        return Product::paginate(10);
+        return Product::get(); //Se realizo de esta manera por temas de prueba, en produccion se usaria paginacion.
     }
 
     public function viewProductById($productId){  
-        $foundProduct = Product::where("id",$productId)->first();
-        if (!$foundProduct)
-            {
-                return "Producto no encontrado";
-            }
+        $foundProduct = Product::findOrFail($productId);
         return $foundProduct;
     }
 
     public function updateProduct($updatedProductBody,$productId){  
-        $foundProduct = Product::where("id",$productId)->exists();
-        if (!$foundProduct)
-            {
-                return [];
-            } 
+        $foundProduct = Product::findOrFail($productId);
+
         $updatedProduct = Product::where("id",$productId)->update($updatedProductBody);
     return $updatedProductBody;
     }
 
     public function deleteProduct($productId){  
-        $foundProduct = Product::find($productId);
-        if (!$foundProduct)
-            {
-                return "No se encontro ningun producto";
-            } 
-            
+        $foundProduct = Product::findOrFail($productId);
+         
             $foundProduct->delete();
+  return true;
+}
 
-        return "Eliminado con exito";
-    }
-
-    public function priceListOfProduct($producetId)
+    public function priceListOfProduct($productId)
     {
-        
-        $x= Product::with("prices.currency")->find($producetId);
-        return $x;
-        $name =$x->name;
-        return $x->prices;
-        $price =$x->prices->price;
-        $sym=$x->prices->currency->symbol;
-        return [$name,$price,$sym];
+        $priceListOfProduct = Product::with("prices.currency")->findOrFail($productId);
+        if (!$priceListOfProduct)
+            {
+                 throw new ModelNotFoundException('Product not found');
+            }
+        $listOfPrices = [
+        'name' => $priceListOfProduct->name,
+        'prices' => []
+    ];
+
+    foreach ($priceListOfProduct->prices as $price) {
+        $listOfPrices['prices'][] = [
+            'amount' => $price->price,
+            'currency' => $price->currency->symbol
+        ];
+    }
+        return $listOfPrices;
 
     }
     
     public function createNewPriceOfProduct($productId,$validatedPriceProduct)
     {
          
-        $foundProduct = Product::where("id",$productId)->exists();
-        if (!$foundProduct)
-            {
-                return "No se encontro ningun producto con este id";
-            } 
-            ;
+        $foundProduct = Product::findOrFail($productId);
         $newPriceProduct = ProductPrice::create([
             "product_id"=>$productId,
             "currency_id"=>$validatedPriceProduct["currency_id"],
             "price"=>$validatedPriceProduct["price"],             
         ]);
         
-        return "Precio ingresado con exito";
+  return true;
     }
 }
