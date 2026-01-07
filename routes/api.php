@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 
 Route::controller(ProductController::class)->group(function() {
 Route::prefix("products")->group(function() {
+   Route::get("/","viewAllProducts");
    Route::post("/","createNewProduct"); 
    Route::get("/{id}","viewProductById");
    Route::put("/{id}","updateProduct");

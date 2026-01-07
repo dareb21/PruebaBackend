@@ -1,34 +1,63 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Product;
-use Illuminate\Http\Request;
+
+use App\Services\ProductServices;
+use App\Http\Requests\Products\CreateNewProductRequest;
+use App\Http\Requests\Products\UpdateProductRequest;
+use App\Http\Requests\PriceProducts\CreateNewPriceProductRequest;
+
 
 class ProductController extends Controller
 {
-    public function createNewProduct(){  
-        return response()->json(["message"=> "endpoint para crear producto"]);
+    public function __construct(private ProductServices $productServices ) {}
+    
+    public function createNewProduct(CreateNewProductRequest $request){  
+        $validatedNewProduct = $request->validated();
+        $newProduct = $this->productServices->createNewProduct($validatedNewProduct); 
+    
+    return response()->json([
+        'message' => 'Producto creado correctamente', 
+        'product' => $newProduct,
+        ], 201);
     }
 
-    public function viewProductById($id){  
-        return response()->json(["message"=> "endpoint para ver producto con id ".+$id]);
+    public function viewAllProducts(){
+        $allProducts = $this->productServices->viewAllProduct();
+        return response()->json(["products" =>$allProducts]);
     }
 
-    public function updateProduct($id){  
-        return response()->json(["message"=> "endpoint para actualizar un product"]);
+    public function viewProductById($productId){  
+        $productFound = $this->productServices->viewProductById($productId);
+        return response()->json(["product"=>$productFound ]);
     }
 
-    public function deleteProduct($id){  
-        return response()->json(["message"=> "endpoint para eliminar un producto"]);
+    public function updateProduct(UpdateProductRequest $request, $productId){
+        $validatedProductInfo = $request->validated();
+        $updatedProduct = $this->productServices->updateProduct($validatedProductInfo,$productId);
+        return response()->json(["atributes"=> $updatedProduct]);
+    }
+//Mejorar mensaje
+    public function deleteProduct($productId){  
+        $deletedProducted = $this->productServices->deleteProduct($productId);
+        return response()->json(["Message"=>$deletedProducted]);
+
     }
 
-    public function priceListOfProduct($id)
+//Desarollo
+    public function priceListOfProduct($productId)
     {
-        return response()->json(["message"=> "endpoint para lista de precios un producto"]);
+       return $priceListOfProduct = $this->productServices->priceListOfProduct($productId);
     }
 
-    public function createNewPriceOfProduct($id)
-    {
-        return response()->json(["message"=> "endpoint para crear nuevo precio para un producto"]);
+    public function createNewPriceOfProduct(CreateNewPriceProductRequest $request,$productId)
+    {   
+        
+        $validatedPriceProduct = $request->validated();
+        
+        $newPriceProduct = $this->productServices->createNewPriceOfProduct($productId,$validatedPriceProduct);
+
+        return response()->json(["Message"=>$newPriceProduct]);
+
     }
 }
