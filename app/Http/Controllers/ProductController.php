@@ -36,16 +36,20 @@ class ProductController extends Controller
     public function updateProduct(UpdateProductRequest $request, $productId){
         $validatedProductInfo = $request->validated();
         $updatedProduct = $this->productServices->updateProduct($validatedProductInfo,$productId);
-        return response()->json(["atributes"=> $updatedProduct]);
+        return response()->json([
+            'message' => 'Producto creado correctamente',
+            "updated_fields"=> $updatedProduct],
+            200
+        );
     }
-//Mejorar mensaje
+
     public function deleteProduct($productId){  
         $deletedProducted = $this->productServices->deleteProduct($productId);
-        return response()->json(["Message"=>$deletedProducted]);
+    
+        return response()->json(["message"=>"Producto eliminado con exito"],200);
 
     }
 
-//Desarollo
     public function priceListOfProduct($productId)
     {
         $priceListOfProduct = $this->productServices->priceListOfProduct($productId);
@@ -60,7 +64,10 @@ class ProductController extends Controller
         
         $newPriceProduct = $this->productServices->createNewPriceOfProduct($productId,$validatedPriceProduct);
 
-        return response()->json(["Message"=>$newPriceProduct]);
-
+        return response()->json([
+                'message' => 'Precio agregado exitosamente.',
+                "new_price"=> $newPriceProduct],
+                200
+            );
     }
 }

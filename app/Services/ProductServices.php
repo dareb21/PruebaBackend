@@ -3,10 +3,21 @@ namespace App\Services;
 use App\Models\Product;
 use App\Models\ProductPrice;
 use Illuminate\Support\Facades\DB; 
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class ProductServices
 {
+    private function validateProductExists($productId)
+    {
+        $productFound=Product::find($productId);
+        if (!$productFound)
+            {
+              throw new HttpResponseException(response()->json(['message' => 'Producto NO encontrado'], 404));
+            }
+        return $productFound;    
+    }
+    
+
     public function createNewProduct(array $newProductBody){
 
     return DB::transaction(function () use ($newProductBody) {
@@ -26,22 +37,19 @@ class ProductServices
     }
 
     public function viewProductById($productId){  
-        $foundProduct = Product::findOrFail($productId);
-        return $foundProduct;
+        $foundProduct = $this->validateProductExists($productId);
+        return $foundProduct;   
     }
 
     public function updateProduct($updatedProductBody,$productId){  
-        $foundProduct = Product::findOrFail($productId);
-
+        $foundProduct = $this->validateProductExists($productId);
         $updatedProduct = Product::where("id",$productId)->update($updatedProductBody);
     return $updatedProductBody;
     }
 
     public function deleteProduct($productId){  
-        $foundProduct = Product::findOrFail($productId);
-         
-            $foundProduct->delete();
-  return true;
+        $foundProduct = $this->validateProductExists($productId);
+        $foundProduct->delete();
 }
 
     public function priceListOfProduct($productId)
@@ -49,7 +57,7 @@ class ProductServices
         $priceListOfProduct = Product::with("prices.currency")->findOrFail($productId);
         if (!$priceListOfProduct)
             {
-                 throw new ModelNotFoundException('Product not found');
+                throw new HttpResponseException(response()->json(['message' => 'Producto NO encontrado'], 404));
             }
         $listOfPrices = [
         'name' => $priceListOfProduct->name,
@@ -68,14 +76,13 @@ class ProductServices
     
     public function createNewPriceOfProduct($productId,$validatedPriceProduct)
     {
-         
-        $foundProduct = Product::findOrFail($productId);
+        $foundProduct = $this->validateProductExists($productId);
         $newPriceProduct = ProductPrice::create([
             "product_id"=>$productId,
             "currency_id"=>$validatedPriceProduct["currency_id"],
             "price"=>$validatedPriceProduct["price"],             
         ]);
         
-  return true;
+  return $validatedPriceProduct["price"];
     }
 }
